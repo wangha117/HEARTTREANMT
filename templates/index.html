@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>热处理硬度预测系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">金属材料硬度预测</h1>
+        
+        <!-- 输入表单 -->
+        <form id="predictionForm">
+            <div class="input-group">
+                <label for="c_percent">碳含量（%）:</label>
+                <input type="number" step="0.01" id="c_percent" name="c_percent" required 
+                       placeholder="例如：0.35" min="0.1" max="1.0">
+            </div>
+
+            <div class="input-group">
+                <label for="quench_temp">淬火温度（℃）:</label>
+                <input type="number" id="quench_temp" name="quench_temp" required 
+                       placeholder="例如：880" min="500" max="1200">
+            </div>
+
+            <div class="input-group">
+                <label for="temper_time">回火时间（小时）:</label>
+                <input type="number" step="0.1" id="temper_time" name="temper_time" required 
+                       placeholder="例如：1.5" min="0.5" max="10">
+            </div>
+
+            <button type="submit" class="predict-btn">立即预测</button>
+        </form>
+
+        <!-- 结果显示区域 -->
+        <div id="result" class="result-box"></div>
+    </div>
+
+    <!-- JavaScript处理 -->
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // 阻止表单默认提交
+            
+            // 获取输入值
+            const formData = {
+                c_percent: document.getElementById('c_percent').value,
+                quench_temp: document.getElementById('quench_temp').value,
+                temper_time: document.getElementById('temper_time').value
+            };
+
+            try {
+                // 发送预测请求
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(formData)
+                });
+                
+                // 显示结果
+                const resultText = await response.text();
+                document.getElementById('result').innerHTML = `
+                    <div class="result-success">${resultText}</div>
+                `;
+                
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result-error">预测失败，请检查输入</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
